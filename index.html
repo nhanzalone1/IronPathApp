@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IronPath Pro</title>
+<style>
+  /* RESET & BASICS */
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 20px;
+    background-color: #121212;
+    color: white;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  /* CONTAINER */
+  .container {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: #1e1e1e;
+    padding: 25px;
+    border-radius: 15px;
+    border: 1px solid #333;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  }
+
+  /* TEXT */
+  h1 { text-align: center; margin-top: 0; background: linear-gradient(to right, #fff, #999); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  p.sub { text-align: center; color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 25px; }
+
+  /* INPUTS */
+  label { display: block; color: #aaa; font-size: 11px; font-weight: bold; margin-bottom: 8px; }
+  input {
+    width: 100%; padding: 15px; margin-bottom: 20px;
+    background: #121212; border: 1px solid #333; border-radius: 8px;
+    color: white; font-size: 16px;
+  }
+
+  /* BUTTONS */
+  button {
+    width: 100%; padding: 15px; border: none; border-radius: 8px;
+    font-size: 16px; font-weight: bold; cursor: pointer;
+    margin-top: 10px;
+  }
+  .btn-main { background: linear-gradient(135deg, #ff4757, #ff6b81); color: white; }
+  .btn-reset { background: transparent; border: 1px solid #444; color: #666; font-size: 12px; margin-top: 30px; }
+
+  /* SIDEBAR */
+  .sidebar {
+    position: fixed; top: 0; right: -320px; width: 300px; height: 100%;
+    background: #181818; padding: 20px; border-left: 1px solid #333;
+    transition: right 0.3s; z-index: 999;
+  }
+  .sidebar.active { right: 0; }
+  .toggle { position: fixed; top: 20px; right: 20px; background: #333; padding: 8px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; z-index: 1000; }
+
+  /* PLATE CALC */
+  .plate-box { height: 30px; margin-top: 5px; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: black; font-weight: bold; font-size: 11px; }
+
+  /* SCHEDULE */
+  #schedule { margin-top: 40px; display: none; }
+  .week { background: #252525; border-radius: 10px; padding: 15px; margin-bottom: 20px; border: 1px solid #333; }
+  .week-head { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+  
+  .day-row { display: flex; justify-content: space-between; padding: 12px 5px; cursor: pointer; border-radius: 5px; }
+  .day-row:hover { background: #333; }
+  
+  .tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; color: black; font-weight: bold; margin-left: 5px; }
+  .tag-h { background: #ff4757; } .tag-l { background: #2ed573; } .tag-m { background: #ffa502; }
+  
+  .warmup { background: #111; border-left: 2px solid #ffa502; padding: 10px; margin-top: 5px; display: none; font-size: 13px; color: #ccc; }
+  .warmup.show { display: block; }
+  
+  .completed { text-decoration: line-through; opacity: 0.5; color: #2ed573; }
+  .chk { width: 20px; height: 20px; border: 2px solid #555; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-right: 10px; }
+  .completed .chk { background: #2ed573; border-color: #2ed573; }
+  .completed .chk::after { content: '✓'; color: black; font-size: 12px; font-weight: bold; }
+
+</style>
+</head>
+<body>
+
+<div class="toggle" onclick="document.getElementById('side').classList.toggle('active')">TOOLS ⚒</div>
+
+<div class="sidebar" id="side">
+  <h3 style="color:#ff4757; border-bottom:1px solid #333; padding-bottom:10px;">Plate Math</h3>
+  <input type="number" id="pIn" placeholder="Target Weight (45+)">
+  <button class="btn-main" style="background:#2ed573; color:black" onclick="calcP()">Calculate</button>
+  <div id="pOut" style="margin-top:20px;"></div>
+</div>
+
+<div class="container">
+  <h1>IRONPATH</h1>
+  <p class="sub">Baechle 8-Week Engine</p>
+
+  <label>WEIGHT (LBS)</label>
+  <input type="number" id="w" placeholder="e.g. 225">
+
+  <label>REPS</label>
+  <input type="number" id="r" placeholder="e.g. 5">
+
+  <button class="btn-main" onclick="gen()">GENERATE PROGRAM</button>
+
+  <div id="schedule"></div>
+  <button class="btn-reset" onclick="reset()">RESET DATA</button>
+</div>
+
+<script>
+function gen() {
+  const w = parseFloat(document.getElementById('w').value);
+  const r = parseFloat(document.getElementById('r').value);
+  if(!w || !r) { alert("Enter numbers"); return; }
+  
+  const rnd = n => Math.round(n/5)*5;
+  const max = rnd(w * (1+(0.033*r)));
+  const rm5 = rnd(max*0.87);
+  const rm3 = rnd(max*0.93);
+  
+  const div = document.getElementById('schedule');
+  div.style.display = 'block';
+  div.innerHTML = "";
+
+  const weeks = [
+    {n:1,t:"BASE",b:rm5,m:.85,r:"5-6"}, {n:2,t:"LOAD",b:rm5,m:.9,r:"5-6"},
+    {n:3,t:"INTENSE",b:rm5,m:.95,r:"5-6"}, {n:4,t:"PEAK",b:rm5,m:1.05,r:"5-6"},
+    {n:5,t:"UNLOAD",b:rm5,m:.85,r:"2-4",f:.9}, {n:6,t:"SPEED",b:rm3,m:1,r:"2-4",w:.75,f:.85},
+    {n:7,t:"FORCE",b:rm3,m:1,r:"2-4",w:.85,f:.9}, {n:8,t:"MAX",b:rm3,m:1,r:"2-3",w:.7,f:.85}
+  ];
+
+  weeks.forEach(wk => {
+    let m = rnd(wk.b*wk.m);
+    let wL = rnd(m*(wk.w||.85)); if(wk.n===4) wL=rnd(m*.8);
+    let f = rnd(m*(wk.f||.95));
+
+    const row = (d, l, c, tag) => {
+      const id = `w${wk.n}-${d}`;
+      const cls = localStorage.getItem(id) ? "completed" : "";
+      const w2=rnd(l*.5), w3=rnd(l*.7), w4=rnd(l*.9);
+      
+      return `
+      <div class="${cls}" id="row-${id}">
+        <div class="day-row" onclick="document.getElementById('wm-${id}').classList.toggle('show')">
+          <div style="display:flex; align-items:center;">
+            <div class="chk" onclick="toggle('${id}', event)"></div>
+            <b>${d}</b>
+          </div>
+          <div>
+            <b>${l} x ${wk.r}</b> <span class="tag ${c}">${tag}</span> ▾
+          </div>
+        </div>
+        <div id="wm-${id}" class="warmup">
+          <div style="color:#ffa502; font-weight:bold; margin-bottom:5px;">WARM-UP (${l} lbs)</div>
+          <div style="display:flex; justify-content:space-between;"><span>Bar x10</span> <span>45 lbs</span></div>
+          <div style="display:flex; justify-content:space-between;"><span>Warm 1 x5</span> <span>${w2} lbs</span></div>
+          <div style="display:flex; justify-content:space-between;"><span>Warm 2 x3</span> <span>${w3} lbs</span></div>
+          <div style="display:flex; justify-content:space-between;"><span>Warm 3 x1</span> <span>${w4} lbs</span></div>
+        </div>
+      </div>`;
+    };
+
+    div.innerHTML += `
+    <div class="week">
+      <div class="week-head">
+        <b style="font-size:18px">Week ${wk.n}</b>
+        <span style="color:#ff4757; font-weight:bold">${wk.t}</span>
+      </div>
+      ${row('Mon', m, 'tag-h', 'H')}
+      ${row('Wed', wL, 'tag-l', 'L')}
+      ${row('Fri', f, 'tag-m', 'M')}
+    </div>`;
+  });
+}
+
+function toggle(id, e) {
+  e.stopPropagation();
+  const row = document.getElementById('row-'+id);
+  if(row.classList.contains('completed')) {
+    row.classList.remove('completed');
+    localStorage.removeItem(id);
+  } else {
+    row.classList.add('completed');
+    localStorage.setItem(id, '1');
+  }
+}
+
+function reset() {
+  if(confirm("Reset all progress?")) { localStorage.clear(); location.reload(); }
+}
+
+function calcP() {
+  const w = parseFloat(document.getElementById('pIn').value);
+  const out = document.getElementById('pOut');
+  if(!w || w<45) { out.innerHTML="45+ Only"; return; }
+  let r = (w-45)/2;
+  let h = `<div class='plate-box' style='background:#444; color:white'>BAR (45)</div>`;
+  [45,35,25,10,5,2.5].forEach(s => {
+    while(r>=s) {
+      let c="#eee"; if(s==45)c="#45aaf2"; if(s==25)c="#2ed573";
+      h+=`<div class='plate-box' style='background:${c}'>${s}</div>`;
+      r-=s;
+    }
+  });
+  out.innerHTML = h + `<div style='text-align:center; margin-top:10px; color:#2ed573'>${(w-45)/2} / side</div>`;
+}
+</script>
+</body>
+</html>
