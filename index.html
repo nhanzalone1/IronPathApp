@@ -12,7 +12,6 @@
     background-color: #121212;
     color: white;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    /* Prevents horizontal scroll on mobile */
     overflow-x: hidden; 
   }
 
@@ -25,6 +24,7 @@
     border-radius: 20px;
     border: 1px solid #333;
     box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+    position: relative;
   }
 
   /* --- HEADERS --- */
@@ -44,9 +44,7 @@
   input {
     width: 100%; padding: 16px; margin-bottom: 20px;
     background: #121212; border: 1px solid #333; border-radius: 12px;
-    color: white; font-size: 18px; font-weight: 500;
-    /* Prevents zoom on iPhone */
-    font-size: 16px; 
+    color: white; font-size: 16px; font-weight: 500;
   }
   input:focus { outline: none; border-color: #ff4757; }
 
@@ -61,16 +59,19 @@
   
   .btn-main { background: linear-gradient(135deg, #ff4757, #ff6b81); color: white; box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3); }
   .btn-reset { background: #2a2a2a; color: #ff4757; margin-top: 40px; font-size: 12px; padding: 15px; border: 1px solid #333; }
+  
+  /* Info Button */
+  .info-btn {
+    position: absolute; top: 20px; right: 20px;
+    width: 25px; height: 25px; border-radius: 50%; border: 1px solid #444;
+    color: #888; display: flex; align-items: center; justify-content: center;
+    font-size: 14px; cursor: pointer; padding: 0; margin: 0;
+  }
 
   /* --- 1RM DISPLAY --- */
   #stats-bar {
-    display: none; /* Hidden by default */
-    background: #252525;
-    margin: 20px 0 30px 0;
-    padding: 15px;
-    border-radius: 10px;
-    text-align: center;
-    border: 1px solid #333;
+    display: none; background: #252525; margin: 20px 0 30px 0;
+    padding: 15px; border-radius: 10px; text-align: center; border: 1px solid #333;
     animation: fadeIn 0.5s ease;
   }
   .stat-label { color: #888; font-size: 11px; text-transform: uppercase; display: block; margin-bottom: 5px; }
@@ -81,7 +82,7 @@
     position: fixed; top: 0; right: -100%; width: 85%; max-width: 320px; height: 100%;
     background: #181818; padding: 25px; border-left: 1px solid #333;
     transition: right 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); z-index: 1000;
-    box-shadow: -10px 0 50px rgba(0,0,0,0.8);
+    box-shadow: -10px 0 50px rgba(0,0,0,0.8); overflow-y: auto;
   }
   .sidebar.active { right: 0; }
   .overlay {
@@ -98,12 +99,19 @@
     font-size: 11px; font-weight: bold; cursor: pointer; z-index: 900; 
   }
 
+  /* --- TIMER --- */
+  .timer-box { background: #222; border-radius: 10px; padding: 15px; border: 1px solid #333; margin-bottom: 30px; text-align: center; }
+  .timer-display { font-size: 32px; font-weight: 900; color: white; margin: 10px 0; font-variant-numeric: tabular-nums; }
+  .timer-controls { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-bottom: 10px; }
+  .t-btn { background: #333; border: none; color: #ccc; padding: 8px; border-radius: 5px; font-weight: bold; font-size: 12px; cursor:pointer;}
+  .t-stop { background: #ff4757; color: white; width: 100%; border:none; padding:8px; border-radius:5px; font-weight:bold; cursor:pointer;}
+
   /* --- PLATE CALC --- */
   .plate-box { height: 35px; margin-top: 5px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: black; font-weight: bold; font-size: 12px; }
 
   /* --- SCHEDULE --- */
   #schedule { margin-top: 30px; display: none; }
-  .week { background: #1a1a1a; border-radius: 12px; padding: 0; margin-bottom: 25px; border: 1px solid #2a2a2a; overflow: hidden; }
+  .week { background: #1a1a1a; border-radius: 12px; margin-bottom: 25px; border: 1px solid #2a2a2a; overflow: hidden; }
   .week-head { 
     display: flex; justify-content: space-between; align-items: center;
     background: #222; padding: 15px 20px; border-bottom: 1px solid #2a2a2a; 
@@ -111,15 +119,13 @@
   
   .day-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; cursor: pointer; border-bottom: 1px solid #222; }
   .day-row:last-child { border-bottom: none; }
-  .day-row:active { background: #222; }
   
-  .tag { font-size: 9px; padding: 3px 6px; border-radius: 4px; color: black; font-weight: 800; margin-left: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .tag { font-size: 9px; padding: 3px 6px; border-radius: 4px; color: black; font-weight: 800; margin-left: 8px; text-transform: uppercase; }
   .tag-h { background: #ff4757; } .tag-l { background: #2ed573; } .tag-m { background: #ffa502; }
   
   /* --- WARMUP --- */
   .warmup { background: #151515; border-left: 3px solid #ffa502; padding: 15px; display: none; }
   .warmup.show { display: block; animation: slideDown 0.2s ease; }
-  
   .wu-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; color: #bbb; }
   .wu-lbl { color: #666; font-size: 11px; font-weight: bold; text-transform: uppercase; }
   .wu-val { font-weight: bold; color: #e0e0e0; }
@@ -134,9 +140,20 @@
   .completed .chk { background: #2ed573; border-color: #2ed573; }
   .completed .chk::after { content: '✓'; color: black; font-size: 14px; font-weight: bold; }
 
-  /* --- ANIMATIONS --- */
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  /* --- INFO MODAL --- */
+  #info-modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8); z-index: 2000; display: none;
+    align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-box { background: #222; padding: 25px; border-radius: 15px; max-width: 400px; border: 1px solid #444; }
+  .modal-title { color: white; font-size: 18px; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 10px; }
+  .modal-txt { color: #ccc; font-size: 14px; line-height: 1.5; margin-bottom: 10px; }
+  .legend-row { display: flex; align-items: center; margin-bottom: 8px; font-size: 13px; color: #aaa; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 10px; }
+
   @keyframes slideDown { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
 </style>
 </head>
@@ -144,16 +161,39 @@
 
 <div class="overlay" id="overlay" onclick="toggleSide()"></div>
 
+<div id="info-modal" onclick="this.style.display='none'">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-title">Program Guide</div>
+        <p class="modal-txt">This program follows the Baechle 8-Week Linear Periodization model. It cycles intensity to peak your strength.</p>
+        <div class="legend-row"><div class="dot" style="background:#ff4757"></div> <b>H (Heavy)</b>: Primary stress day. 100% intensity.</div>
+        <div class="legend-row"><div class="dot" style="background:#2ed573"></div> <b>L (Light)</b>: Recovery. 80-85% of Heavy day.</div>
+        <div class="legend-row"><div class="dot" style="background:#ffa502"></div> <b>M (Medium)</b>: Volume. 90-95% of Heavy day.</div>
+        <button class="btn-main" style="margin-top:20px; font-size:14px; padding:10px;" onclick="document.getElementById('info-modal').style.display='none'">GOT IT</button>
+    </div>
+</div>
+
 <div class="toggle" onclick="toggleSide()">TOOLS ⚒</div>
 
 <div class="sidebar" id="side">
-  <h3 style="color:#ff4757; border-bottom:1px solid #333; padding-bottom:15px; margin-top:0;">Plate Math</h3>
+  <h3 style="color:#ff4757; margin-top:0;">REST TIMER</h3>
+  <div class="timer-box">
+      <div class="timer-display" id="t-disp">00:00</div>
+      <div class="timer-controls">
+          <button class="t-btn" onclick="startTimer(90)">90s</button>
+          <button class="t-btn" onclick="startTimer(180)">3m</button>
+          <button class="t-btn" onclick="startTimer(300)">5m</button>
+      </div>
+      <button class="t-stop" onclick="stopTimer()">STOP</button>
+  </div>
+
+  <h3 style="color:#ff4757; border-top:1px solid #333; padding-top:20px;">PLATE MATH</h3>
   <input type="number" id="pIn" placeholder="Target Weight (45+)">
   <button class="btn-main" style="background:#2ed573; color:black; margin-top:0;" onclick="calcP()">Calculate</button>
   <div id="pOut" style="margin-top:25px;"></div>
 </div>
 
 <div class="container">
+  <div class="info-btn" onclick="document.getElementById('info-modal').style.display='flex'">?</div>
   <h1>IRONPATH</h1>
   <p class="sub">Baechle 8-Week Engine</p>
 
@@ -182,8 +222,6 @@
 function gen() {
   const w = parseFloat(document.getElementById('w').value);
   const r = parseFloat(document.getElementById('r').value);
-  
-  // Mobile fix: dismiss keyboard
   document.activeElement.blur(); 
 
   if(!w || !r) { alert("Please enter weight and reps."); return; }
@@ -193,11 +231,9 @@ function gen() {
   const rm5 = rnd(max*0.87);
   const rm3 = rnd(max*0.93);
   
-  // 1. Show Max
   document.getElementById('max-val').innerText = max + " lbs";
   document.getElementById('stats-bar').style.display = 'block';
 
-  // 2. Build Schedule
   const div = document.getElementById('schedule');
   const rBtn = document.getElementById('reset-btn');
   div.style.display = 'block';
@@ -235,18 +271,10 @@ function gen() {
         </div>
         
         <div id="wm-${id}" class="warmup">
-            <div class="wu-row">
-                <span class="wu-lbl">Set 1 (Empty)</span> <span class="wu-val">10 reps @ 45 lbs</span>
-            </div>
-            <div class="wu-row">
-                <span class="wu-lbl">Set 2</span> <span class="wu-val">5 reps @ ${w2} lbs</span>
-            </div>
-            <div class="wu-row">
-                <span class="wu-lbl">Set 3</span> <span class="wu-val">3 reps @ ${w3} lbs</span>
-            </div>
-            <div class="wu-row">
-                <span class="wu-lbl">Set 4 (Primer)</span> <span class="wu-val">1 rep @ ${w4} lbs</span>
-            </div>
+            <div class="wu-row"><span class="wu-lbl">Set 1 (Empty)</span> <span class="wu-val">10 reps @ 45 lbs</span></div>
+            <div class="wu-row"><span class="wu-lbl">Set 2</span> <span class="wu-val">5 reps @ ${w2} lbs</span></div>
+            <div class="wu-row"><span class="wu-lbl">Set 3</span> <span class="wu-val">3 reps @ ${w3} lbs</span></div>
+            <div class="wu-row"><span class="wu-lbl">Set 4 (Primer)</span> <span class="wu-val">1 rep @ ${w4} lbs</span></div>
         </div>
       </div>`;
     };
@@ -265,9 +293,7 @@ function gen() {
 }
 
 // --- INTERACTION ---
-function toggleWarm(id) {
-    document.getElementById(`wm-${id}`).classList.toggle('show');
-}
+function toggleWarm(id) { document.getElementById(`wm-${id}`).classList.toggle('show'); }
 
 function toggleCheck(id, e) {
   e.stopPropagation();
@@ -281,35 +307,43 @@ function toggleCheck(id, e) {
   }
 }
 
-// --- SMOOTH RESET (NO POPUP) ---
 function reset() {
-  // 1. Clear Data
   localStorage.clear();
-  
-  // 2. Clear Inputs
   document.getElementById('w').value = '';
   document.getElementById('r').value = '';
-  
-  // 3. Hide Results
   document.getElementById('schedule').style.display = 'none';
   document.getElementById('stats-bar').style.display = 'none';
   document.getElementById('reset-btn').style.display = 'none';
-  
-  // 4. Scroll to top smooth
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// --- SIDEBAR & PLATE CALC ---
+// --- TOOLS ---
 function toggleSide() { 
     document.getElementById('side').classList.toggle('active');
     document.getElementById('overlay').classList.toggle('active');
 }
 
+let timer;
+function startTimer(s) {
+    clearInterval(timer);
+    const end = Date.now() + s * 1000;
+    disp(s);
+    timer = setInterval(() => {
+        const left = Math.round((end - Date.now()) / 1000);
+        if(left < 0) { clearInterval(timer); document.getElementById('t-disp').innerText = "DONE"; return; }
+        disp(left);
+    }, 1000);
+}
+function disp(s) {
+    const m = Math.floor(s/60);
+    const rem = s%60;
+    document.getElementById('t-disp').innerText = `${m}:${rem<10?'0':''}${rem}`;
+}
+function stopTimer() { clearInterval(timer); document.getElementById('t-disp').innerText = "00:00"; }
+
 function calcP() {
   const w = parseFloat(document.getElementById('pIn').value);
   const out = document.getElementById('pOut');
-  
-  // Dismiss keyboard on mobile
   document.activeElement.blur(); 
   
   if(!w || w<45) { out.innerHTML="<div style='color:orange; text-align:center;'>45+ lbs Only</div>"; return; }
